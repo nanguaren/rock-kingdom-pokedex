@@ -14,7 +14,13 @@ def load_data():
     files = os.listdir(data_dir)
 
     def read_file(keyword):
-        target = next((f for f in files if keyword in f.lower()), None)
+        candidates = [f for f in files if keyword in f.lower()]
+        # Prefer .xlsx over others
+        xlsx_files = [f for f in candidates if f.endswith('.xlsx')]
+        if xlsx_files:
+            target = xlsx_files[0]
+        else:
+            target = candidates[0] if candidates else None
         if not target: return None
         path = os.path.join(data_dir, target)
         if path.endswith('.xlsx'):
@@ -30,7 +36,14 @@ def load_data():
     # 1. 读取精灵数据
     df_stats = read_file("pokemon_stats")
     if df_stats is not None:
-        df_stats['编号_显示'] = df_stats['编号'].astype(str).str.zfill(3)
+        df_stats.columns = df_stats.columns.str.strip()
+        if '编号' not in df_stats.columns:
+            df_stats = None
+        else:
+            try:
+                df_stats['编号_显示'] = df_stats['编号'].astype(str).str.zfill(3)
+            except KeyError:
+                df_stats = None
 
     # 2. 读取技能数据 (优先读 wiki 那份，因为它有“可学习精灵”列)
     df_skills = read_file("skills_wiki")
