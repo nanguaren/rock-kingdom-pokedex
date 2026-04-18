@@ -171,6 +171,10 @@ def show_details(p):
 # --- 6. 主页面布局 ---
 df, df_skills = load_data()
 
+if df is None:
+    st.error("精灵数据加载失败，请检查数据文件。")
+    st.stop()
+
 with st.sidebar:
     st.header("🔍 精准检索")
     query = st.text_input("搜索名字/编号")
